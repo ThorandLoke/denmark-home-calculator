@@ -229,6 +229,8 @@ export default function Home() {
       elinstallationsrapport: "Elinstallationsrapport",
       needLoan: "Har du brug for boliglån? Sammenlign lån nu!",
       compareLoan: "Sammenlign boliglån →",
+      needInsurance: "Har du brug for forsikring? Sammenlign nu!",
+      compareInsurance: "Sammenlign forsikring →",
       // 改造相关
       houseSize: "Boligareal (m²)",
       solarTitle: "Solceller / Solenergi",
@@ -286,6 +288,8 @@ export default function Home() {
       elinstallationsrapport: "Electrical inspection report",
       needLoan: "Need a mortgage? Compare loans now!",
       compareLoan: "Compare mortgages →",
+      needInsurance: "Need insurance? Compare now!",
+      compareInsurance: "Compare insurance →",
       houseSize: "House area (m²)",
       solarTitle: "Solar Panels",
       solarKw: "Desired capacity (kW)",
@@ -342,6 +346,8 @@ export default function Home() {
       elinstallationsrapport: "电力检查报告",
       needLoan: "需要房贷吗？立即比较贷款！",
       compareLoan: "比较房贷 →",
+      needInsurance: "需要保险吗？立即比较！",
+      compareInsurance: "比较保险 →",
       houseSize: "房屋面积 (平方米)",
       solarTitle: "太阳能板",
       solarKw: "期望功率 (kW)",
@@ -575,19 +581,36 @@ export default function Home() {
 
                 {/* Affiliate Link - Pantsat.dk */}
                 {transactionType === "buy" && price && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="text-center">
-                      <p className="text-sm text-blue-700 mb-3">
-                        💰 {t.needLoan}
-                      </p>
-                      <a
-                        href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=78126"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-                      >
-                        {t.compareLoan}
-                      </a>
+                  <div className="mt-4 space-y-3">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <p className="text-sm text-blue-700 mb-3">
+                          💰 {t.needLoan}
+                        </p>
+                        <a
+                          href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=78126"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+                        >
+                          {t.compareLoan}
+                        </a>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-center">
+                        <p className="text-sm text-green-700 mb-3">
+                          🛡️ {t.needInsurance || "Har du brug for forsikring? Sammenlign nu!"}
+                        </p>
+                        <a
+                          href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=60068"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition"
+                        >
+                          {t.compareInsurance || "Sammenlign forsikring →"}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
