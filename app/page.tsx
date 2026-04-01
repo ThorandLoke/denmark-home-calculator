@@ -112,6 +112,18 @@ export default function Home() {
       totalCosts: "Samlede omkostninger",
       price: "Kontantpris",
       netProceeds: "Rådighedsbeløb",
+      tinglysning: "Tinglysning af skøde (0.6%)",
+      agentFee: "Ejendomsmægler salær",
+      moms: "Moms (25%)",
+      berigtigelse: "Berigtigelse / Advokat",
+      ejerskifteforsikring: "Ejerskifteforsikring (½)",
+      tilstandsrapport: "Tilstandsrapport",
+      elinstallationsrapport: "Elinstallationsrapport",
+      needLoan: "Har du brug for boliglån? Sammenlign lån nu!",
+      compareLoan: "Sammenlign boliglån →",
+      infoTjekliste: "Komplet tjekliste for køb/salg af bolig",
+      infoMarkedsdata: "Se prisudvikling i dit område",
+      infoJuridisk: "Forstå reglerne for udlændinge",
     },
     en: {
       title: "Denmark Home Calculator",
@@ -127,6 +139,18 @@ export default function Home() {
       totalCosts: "Total costs",
       price: "Cash price",
       netProceeds: "Net proceeds",
+      tinglysning: "Land registry fee (0.6%)",
+      agentFee: "Real estate agent fee",
+      moms: "VAT (25%)",
+      berigtigelse: "Legal fees",
+      ejerskifteforsikring: "Property transfer insurance (½)",
+      tilstandsrapport: "Building condition report",
+      elinstallationsrapport: "Electrical inspection report",
+      needLoan: "Need a mortgage? Compare loans now!",
+      compareLoan: "Compare mortgages →",
+      infoTjekliste: "Complete checklist for buying/selling",
+      infoMarkedsdata: "See price trends in your area",
+      infoJuridisk: "Understand rules for foreigners",
     },
     zh: {
       title: "丹麦房产计算器",
@@ -142,6 +166,18 @@ export default function Home() {
       totalCosts: "总费用",
       price: "现金价格",
       netProceeds: "净收益",
+      tinglysning: "登记费 (0.6%)",
+      agentFee: "房产中介费",
+      moms: "增值税 (25%)",
+      berigtigelse: "律师费/公证费",
+      ejerskifteforsikring: "产权保险 (一半)",
+      tilstandsrapport: "房屋状况报告",
+      elinstallationsrapport: "电力检查报告",
+      needLoan: "需要房贷吗？立即比较贷款！",
+      compareLoan: "比较房贷 →",
+      infoTjekliste: "买卖房产完整清单",
+      infoMarkedsdata: "查看您所在区域的房价趋势",
+      infoJuridisk: "了解外国人购房规定",
     },
   }[language];
 
@@ -261,22 +297,22 @@ export default function Home() {
               <div className="space-y-3">
                 {transactionType === "buy" ? (
                   <>
-                    <CostRow label="Tinglysning af skøde (0.6%)" amount={costs.tinglysning} />
-                    <CostRow label="Ejendomsmægler salær" amount={costs.agentFee} />
-                    <CostRow label="Moms (25%)" amount={costs.moms} />
-                    <CostRow label="Berigtigelse / Advokat" amount={costs.berigtigelse} />
-                    <CostRow label="Ejerskifteforsikring (½)" amount={costs.ejerskifteforsikring} />
-                    <CostRow label="Tilstandsrapport" amount={costs.tilstandsrapport} />
-                    <CostRow label="Elinstallationsrapport" amount={costs.elinstallationsrapport} />
+                    <CostRow label={t.tinglysning} amount={costs.tinglysning} />
+                    <CostRow label={t.agentFee} amount={costs.agentFee} />
+                    <CostRow label={t.moms} amount={costs.moms} />
+                    <CostRow label={t.berigtigelse} amount={costs.berigtigelse} />
+                    <CostRow label={t.ejerskifteforsikring} amount={costs.ejerskifteforsikring} />
+                    <CostRow label={t.tilstandsrapport} amount={costs.tilstandsrapport} />
+                    <CostRow label={t.elinstallationsrapport} amount={costs.elinstallationsrapport} />
                   </>
                 ) : (
                   <>
-                    <CostRow label="Ejendomsmægler salær" amount={costs.agentFee} />
-                    <CostRow label="Moms (25%)" amount={costs.moms} />
-                    <CostRow label="Ejerskifteforsikring (½)" amount={costs.ejerskifteforsikring} />
-                    <CostRow label="Tilstandsrapport" amount={costs.tilstandsrapport} />
-                    <CostRow label="Elinstallationsrapport" amount={costs.elinstallationsrapport} />
-                    <CostRow label="Berigtigelse" amount={costs.berigtigelse} />
+                    <CostRow label={t.agentFee} amount={costs.agentFee} />
+                    <CostRow label={t.moms} amount={costs.moms} />
+                    <CostRow label={t.ejerskifteforsikring} amount={costs.ejerskifteforsikring} />
+                    <CostRow label={t.tilstandsrapport} amount={costs.tilstandsrapport} />
+                    <CostRow label={t.elinstallationsrapport} amount={costs.elinstallationsrapport} />
+                    <CostRow label={t.berigtigelse} amount={costs.berigtigelse} />
                   </>
                 )}
               </div>
@@ -305,7 +341,7 @@ export default function Home() {
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="text-center">
                     <p className="text-sm text-blue-700 mb-3">
-                      💰 Har du brug for boliglån? Sammenlign lån nu!
+                      💰 {t.needLoan}
                     </p>
                     <a
                       href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=78126"
@@ -313,7 +349,7 @@ export default function Home() {
                       rel="noopener noreferrer"
                       className="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
                     >
-                      Sammenlign boliglån →
+                      {t.compareLoan}
                     </a>
                   </div>
                 </div>
@@ -326,18 +362,18 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-4">
           <InfoCard
             icon="📋"
-            title="Tjekliste"
-            description="Komplet tjekliste for køb/salg af bolig"
+            title={language === "zh" ? "检查清单" : language === "en" ? "Checklist" : "Tjekliste"}
+            description={t.infoTjekliste}
           />
           <InfoCard
             icon="📈"
-            title="Markedsdata"
-            description="Se prisudvikling i dit område"
+            title={language === "zh" ? "市场数据" : language === "en" ? "Market Data" : "Markedsdata"}
+            description={t.infoMarkedsdata}
           />
           <InfoCard
             icon="⚖️"
-            title="Juridisk guide"
-            description="Forstå reglerne for udlændinge"
+            title={language === "zh" ? "法律指南" : language === "en" ? "Legal Guide" : "Juridisk guide"}
+            description={t.infoJuridisk}
           />
         </div>
 
