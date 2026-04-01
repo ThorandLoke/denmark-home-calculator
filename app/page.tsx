@@ -301,7 +301,7 @@ export default function Home() {
               </div>
 
               {/* Affiliate Link - Pantsat.dk */}
-              {transactionType === "buy" && (
+              {transactionType === "buy" && price && (
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="text-center">
                     <p className="text-sm text-blue-700 mb-3">
@@ -318,7 +318,6 @@ export default function Home() {
                   </div>
                 </div>
               )}
-              </div>
             </div>
           )}
         </div>
@@ -372,7 +371,7 @@ function CostRow({ label, amount }: { label: string; amount: number }) {
 
 function InfoCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div className="bg-white rounded-xl shadow p-6 text-center hover:shadow-md transition cursor-pointer">
+    <div className="bg-white rounded-xl shadow p-6 text-center hover:shadow-md transition cursor-pointer" onClick={() => alert("Funktion kommer snart! 🚀")}>
       <div className="text-3xl mb-2">{icon}</div>
       <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
       <p className="text-sm text-gray-500">{description}</p>
