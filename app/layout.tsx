@@ -2,8 +2,29 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BoligBeregner Danmark - 丹麦买房成本计算器",
-  description: "计算在丹麦买房的所有真实成本，包括隐藏费用。专为外国人和本地人设计。",
+  title: "BoligBeregner Danmark | Gratis Boliglån & Energiforbedring Beregner",
+  description: "Beregn dine boligomkostninger i Danmark gratis. Få estimat på boliglån, energiforbedring, varmepumpe, solceller, og isolering. Sammenlign tilbud fra lokale leverandører.",
+  keywords: "boligberegner, boliglån Danmark, energiforbedring, varmepumpe, solceller, isolering, boligomkostninger, boligkøb Danmark",
+  authors: [{ name: "ThorandLoke" }],
+  openGraph: {
+    title: "BoligBeregner Danmark - Beregn dine boligomkostninger gratis",
+    description: "Beregn boliglån, energiforbedring, varmepumpe og meget mere. Gratis dansk boligberegner.",
+    url: "https://denmark-home-buyer.vercel.app",
+    siteName: "BoligBeregner Danmark",
+    locale: "da_DK",
+    type: "website",
+  },
+  alternates: {
+    languages: {
+      "da": "https://denmark-home-buyer.vercel.app",
+      "en": "https://denmark-home-buyer.vercel.app?lang=en",
+      "zh": "https://denmark-home-buyer.vercel.app?lang=zh",
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
