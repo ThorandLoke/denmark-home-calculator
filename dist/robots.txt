@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://denmark-home-buyer.vercel.app/sitemap.xml
