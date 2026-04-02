@@ -89,10 +89,12 @@ const SOLAR_DATA = {
   electricityPrice: 2.5,
 };
 
-// 热泵数据
+// 热泵数据（基于丹麦市场数据）
 const HEATPUMP_DATA = {
-  air: { cost: 150000, savings: 15000 },
-  ground: { cost: 250000, savings: 20000 },
+  // 空气源热泵：初期投入低，但效率较低
+  air: { cost: 150000, savings: 14000, efficiency: 300 },
+  // 地源热泵：初期投入高，但效率高，长期更省钱
+  ground: { cost: 280000, savings: 25000, efficiency: 450 },
   annualHeatingCost: 20000,
 };
 
@@ -663,9 +665,12 @@ export default function Home() {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">{t.priceLabel}</label>
               <input
-                type="number" 
-                value={price} 
-                onChange={(e) => setPrice(e.target.value)}
+                type="text" 
+                value={price ? parseFloat(price).toLocaleString('da-DK') : ''} 
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\./g, '').replace(',', '.');
+                  setPrice(raw);
+                }}
                 placeholder="1.275.000"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold"
               />
@@ -786,7 +791,7 @@ export default function Home() {
                     <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
                       <div className="text-center">
                         <p className="text-sm text-green-700 mb-3">🏠 {t.needInsurance}</p>
-                        <a href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=92764" target="_blank" rel="noopener noreferrer" className="inline-block px-6 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition">
+                        <a href="https://www.partner-ads.com/dk/landingpage.php?id=56504&prg=9363&bannerid=92764&desturl=https://velkommen.tilmeld-haandvaerker.dk/3maaned_gratis" target="_blank" rel="noopener noreferrer" className="inline-block px-6 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition">
                           {t.compareInsurance}
                         </a>
                       </div>
@@ -987,6 +992,12 @@ export default function Home() {
                   <div className="flex justify-between pt-2 border-t border-yellow-200"><span>{t.solarPayback}:</span><span className="font-bold">{solarResult.payback.toFixed(1)} {t.solarYears}</span></div>
                 </div>
               )}
+              {/* Solar Affiliate Link */}
+              <div className="mt-4 text-center">
+                <span className="inline-block px-4 py-2 bg-gray-100 text-gray-500 text-sm rounded-lg">
+                  🌞 {language === 'zh' ? '太阳能广告商 Coming Soon' : language === 'en' ? 'Solar affiliate Coming Soon' : 'Solcelle partner Coming Soon'}
+                </span>
+              </div>
             </div>
 
             {/* Heat Pump Calculator */}
@@ -1008,6 +1019,12 @@ export default function Home() {
                 <div className="flex justify-between"><span>{t.heatPumpSavings}:</span><span className="text-green-600 font-medium">{formatCurrency(heatPumpResult.savings)}</span></div>
                 <div className="flex justify-between pt-2 border-t border-red-200"><span>{t.heatPumpPayback}:</span><span className="font-bold">{heatPumpResult.payback.toFixed(1)} {t.solarYears}</span></div>
               </div>
+              {/* Heat Pump Affiliate Link */}
+              <div className="mt-4 text-center">
+                <a href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=82597" target="_blank" rel="noopener noreferrer" className="inline-block px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition">
+                  🔥 {language === 'zh' ? '获取热泵报价 →' : language === 'en' ? 'Get Heat Pump Quotes →' : 'Få tilbud på varmepumpe →'}
+                </a>
+              </div>
             </div>
 
             {/* Windows Calculator */}
@@ -1028,6 +1045,12 @@ export default function Home() {
                   <div className="flex justify-between"><span>{t.windowCost}:</span><span className="font-bold text-blue-600">{formatCurrency(windowResult.cost)}</span></div>
                 </div>
               )}
+              {/* Windows Affiliate Link */}
+              <div className="mt-4 text-center">
+                <a href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=82598" target="_blank" rel="noopener noreferrer" className="inline-block px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition">
+                  🪟 {language === 'zh' ? '获取窗户报价 →' : language === 'en' ? 'Get Window Quotes →' : 'Få tilbud på vinduer →'}
+                </a>
+              </div>
             </div>
 
             {/* Insulation Calculator */}
@@ -1062,17 +1085,28 @@ export default function Home() {
                   <div className="flex justify-between pt-2 border-t border-green-200"><span>{t.solarPayback}:</span><span className="font-bold">{insulationResult.payback.toFixed(1)} {t.solarYears}</span></div>
                 </div>
               )}
+              {/* Insulation Affiliate Link */}
+              <div className="mt-4 text-center">
+                <span className="inline-block px-4 py-2 bg-gray-100 text-gray-500 text-sm rounded-lg">
+                  🏠 {language === 'zh' ? '保暖改造广告商 Coming Soon' : language === 'en' ? 'Insulation affiliate Coming Soon' : 'Isolering partner Coming Soon'}
+                </span>
+              </div>
             </div>
 
-            {/* Get Quotes Button */}
-            <a 
-              href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=0" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-center font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition shadow-lg"
-            >
-              {t.getQuotes}
-            </a>
+            {/* General Renovation Affiliate */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-center">
+              <p className="text-white font-medium mb-4">
+                {language === 'zh' ? '需要装修或改造服务？获取多家报价比较！' : language === 'en' ? 'Need renovation services? Get quotes from multiple providers!' : 'Har du brug for renovering? Få tilbud fra flere leverandører!'}
+              </p>
+              <a 
+                href="https://www.partner-ads.com/dk/klikbanner.php?partnerid=56504&bannerid=82599" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-3 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-100 transition shadow-lg"
+              >
+                {t.getQuotes}
+              </a>
+            </div>
           </div>
         )}
 
