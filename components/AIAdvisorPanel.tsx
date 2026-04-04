@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AI_FEATURES, runLocalAnalysis, runAIAnalysis } from "../lib/ai-advisor";
+import FormulaTooltip, { AI_FEATURE_FORMULAS } from "./FormulaTooltip";
 import type { PropertyContext, AIFeatureResult, Lang } from "../lib/ai-types";
 
 interface AIAdvisorPanelProps {
@@ -31,6 +32,26 @@ function FeatureCard({ featureId, ctx, lang }: { featureId: string; ctx: Propert
   const [result, setResult] = useState<AIFeatureResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+
+  // 上下文变化时自动重新分析
+  useEffect(() => {
+    if (result) {
+      // 自动用新参数重新分析
+      setLoading(true);
+      setExpanded(true);
+      const timeout = setTimeout(async () => {
+        try {
+          const res = await runAIAnalysis(featureId, ctx);
+          setResult(res);
+        } catch {
+          setResult(runLocalAnalysis(featureId, ctx));
+        } finally {
+          setLoading(false);
+        }
+      }, 300); // 防抖 300ms
+      return () => clearTimeout(timeout);
+    }
+  }, [ctx.region, ctx.size, ctx.price, ctx.transactionType, featureId, ctx]);
 
   const meta = AI_FEATURES[featureId];
 
@@ -63,9 +84,15 @@ function FeatureCard({ featureId, ctx, lang }: { featureId: string; ctx: Propert
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">{meta.icon}</span>
-          <div>
+          <div className="flex items-center gap-2">
             <p className="font-semibold text-gray-900 text-sm">{meta.title[lang]}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{meta.desc[lang]}</p>
+            {AI_FEATURE_FORMULAS[featureId] && (
+              <FormulaTooltip 
+                formula={AI_FEATURE_FORMULAS[featureId]} 
+                lang={lang}
+                icon="💡"
+              />
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -136,6 +163,11 @@ export default function AIAdvisorPanel({ ctx, lang }: AIAdvisorPanelProps) {
     en: "7 smart analyses to support your property decision",
     zh: "7 项智能分析，辅助您的房产决策",
   };
+  const SUBTITLE_RENOVATE: Record<Lang, string> = {
+    da: "AI-analyse af renoveringsprioritet og investeringsafkast",
+    en: "AI renovation priority and ROI analysis",
+    zh: "AI 装修优先级和投资回报分析",
+  };
   const SHOW_MORE: Record<Lang, string> = {
     da: "Vis alle analyser ▼",
     en: "Show all analyses ▼",
@@ -147,25 +179,44 @@ export default function AIAdvisorPanel({ ctx, lang }: AIAdvisorPanelProps) {
     zh: "收起 ▲",
   };
 
-  const FEATURES_ALL = Object.keys(AI_FEATURES);
-  const visibleFeatures = showAll ? FEATURES_ALL : FEATURES_ALL.slice(0, 4);
+  // 根据tab类型选择要显示的AI功能
+  const getFeaturesForTab = () => {
+    if (ctx.tabType === "renovate") {
+      return ["renovation"]; // 房屋改造只显示装修优先级分析
+    }
+    return Object.keys(AI_FEATURES); // 其他tab显示所有功能
+  };
+
+  const FEATURES_ALL = getFeaturesForTab();
+  const visibleFeatures = showAll ? FEATURES_ALL : FEATURES_ALL.slice(0, FEATURES_ALL.length);
 
   return (
     <div className="mt-8 bg-white rounded-2xl shadow-lg overflow-hidden">
       {/* Panel Header */}
       <div className="bg-gradient-to-r from-purple-700 to-indigo-700 px-6 py-4">
         <h2 className="text-white font-bold text-lg">{TITLE[lang]}</h2>
-        <p className="text-purple-200 text-sm mt-0.5">{SUBTITLE[lang]}</p>
+        <p className="text-purple-200 text-sm mt-0.5">
+          {ctx.tabType === "renovate" ? SUBTITLE_RENOVATE[lang] : SUBTITLE[lang]}
+        </p>
       </div>
 
       {/* No price warning */}
-      {!ctx.price ? (
+      {!ctx.price && ctx.tabType !== "renovate" ? (
         <div className="p-6 text-center text-gray-400">
           <p className="text-4xl mb-2">🏠</p>
           <p className="text-sm">
             {lang === "zh" ? "请先输入房产价格以启用 AI 分析"
               : lang === "en" ? "Enter a property price to enable AI analysis"
               : "Indtast en ejendomspris for at aktivere AI-analyse"}
+          </p>
+        </div>
+      ) : ctx.tabType === "renovate" && !ctx.size ? (
+        <div className="p-6 text-center text-gray-400">
+          <p className="text-4xl mb-2">🏠</p>
+          <p className="text-sm">
+            {lang === "zh" ? "请先输入房屋面积以启用 AI 分析"
+              : lang === "en" ? "Enter house size to enable AI analysis"
+              : "Indtast husstørrelse for at aktivere AI-analyse"}
           </p>
         </div>
       ) : (
@@ -176,7 +227,7 @@ export default function AIAdvisorPanel({ ctx, lang }: AIAdvisorPanelProps) {
             ))}
           </div>
 
-          {FEATURES_ALL.length > 4 && (
+          {FEATURES_ALL.length > 4 && ctx.tabType !== "renovate" && (
             <button
               onClick={() => setShowAll(!showAll)}
               className="mt-3 w-full py-2 text-sm text-purple-600 hover:text-purple-800 font-medium transition"
