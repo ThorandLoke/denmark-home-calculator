@@ -988,11 +988,15 @@ export default function Home() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
-            <p className="text-sm text-gray-600">{t.subtitle}</p>
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="BoligBeregner" className="h-10 w-10" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">BoligBeregner</h1>
+              <p className="text-sm text-gray-600">{t.subtitle}</p>
+            </div>
           </div>
-          
+
           {/* Language Switcher */}
           <div className="flex gap-2">
             {(['da', 'en', 'zh'] as const).map(lang => (
@@ -1000,8 +1004,8 @@ export default function Home() {
                 key={lang}
                 onClick={() => setLanguage(lang)}
                 className={`px-3 py-1.5 rounded-lg font-medium text-sm transition ${
-                  language === lang 
-                    ? 'bg-blue-500 text-white shadow' 
+                  language === lang
+                    ? 'bg-blue-500 text-white shadow'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
