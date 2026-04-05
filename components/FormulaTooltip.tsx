@@ -442,25 +442,22 @@ export default function FormulaTooltip({ formula, lang, icon = "💡" }: Formula
       >
         {icon}
       </span>
-      
+
       {expanded && (
-        <div 
-          className="absolute left-0 bottom-full mb-2 w-80 max-h-64 p-4 bg-white border-2 border-purple-300 rounded-xl shadow-2xl text-sm z-50 overflow-y-auto"
+        <div
+          className="fixed left-4 bottom-4 w-80 p-4 bg-white border-2 border-purple-300 rounded-xl shadow-2xl text-xs z-[100]"
+          style={{ maxHeight: '400px', overflowY: 'auto', minHeight: '200px' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 shrink-0">
             <h4 className="font-bold text-purple-900">
               {formula.title[lang]}
             </h4>
             <span
               role="button"
               tabIndex={0}
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(false);
-              }}
+              onClick={() => setExpanded(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  e.stopPropagation();
                   setExpanded(false);
                 }
               }}
@@ -469,11 +466,11 @@ export default function FormulaTooltip({ formula, lang, icon = "💡" }: Formula
               ×
             </span>
           </div>
-          <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-xs">
+          <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">
             {formula.content[lang]
-              .replace(/\n{3,}/g, '\n\n')  // 多个空行缩为两个
-              .replace(/\*\*/g, '')      // 移除 Markdown 加粗符号
-              .replace(/•/g, '·')        // 简化项目符号
+              .replace(/\n{3,}/g, '\n\n')
+              .replace(/\*\*/g, '')
+              .replace(/•/g, '·')
               .trim()}
           </div>
         </div>

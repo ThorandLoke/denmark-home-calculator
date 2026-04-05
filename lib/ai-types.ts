@@ -14,6 +14,7 @@ export interface PropertyContext {
   loanYears?: number;
   renovations?: string[];       // 已选改造项目
   lang: Lang;
+  tabType?: "buy" | "sell" | "renovate" | "market" | "pdf"; // 当前tab类型
 }
 
 export interface AIFeatureResult {
@@ -24,6 +25,7 @@ export interface AIFeatureResult {
   confidence?: "high" | "medium" | "low";
   loading?: boolean;
   error?: string;
+  disclaimer?: string;          // 数据来源免责声明
 }
 
 export interface AIPoint {

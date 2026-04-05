@@ -810,6 +810,14 @@ export default function Home() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  // 反馈表单模块
+  const [feedbackText, setFeedbackText] = useState<string>("");
+  const [feedbackLink, setFeedbackLink] = useState<string>("");
+  const [feedbackImage, setFeedbackImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
+
   // 计算结果
   const sellingCosts = useMemo(() => price ? calculateSellingCosts(parseFloat(price)) : null, [price]);
   const buyingCosts = useMemo(() => price ? calculateBuyingCosts(parseFloat(price)) : null, [price]);
@@ -915,6 +923,65 @@ export default function Home() {
     const payback = totalSavings > 0 ? totalCost / totalSavings : 0;
     return { cost: totalCost, savings: totalSavings, payback };
   }, [houseSize, renovations]);
+
+  // 反馈表单处理函数
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFeedbackImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitSuccess(false);
+
+    try {
+      // 调用 Next.js API 保存反馈
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: feedbackText,
+          link: feedbackLink,
+          hasImage: !!feedbackImage,
+          language: language,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      const result = await response.json();
+      console.log('Feedback submitted:', result);
+      
+      // 重置表单
+      setFeedbackText("");
+      setFeedbackLink("");
+      setFeedbackImage(null);
+      setPreviewImage("");
+      
+      setSubmitSuccess(true);
+      
+      // 3秒后隐藏成功消息
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert(language === 'zh' ? '提交失败，请重试' : language === 'en' ? 'Failed to submit, please try again' : 'Fejl ved indsendelse, prøv igen');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -1022,7 +1089,7 @@ export default function Home() {
             </div>
 
             {/* Results */}
-            {(price || tab === "renovate") && (
+            {price && (
               <div className="border-t pt-6">
                 
                 {/* AI Advice */}
@@ -1778,6 +1845,77 @@ export default function Home() {
             </p>
             <div className="inline-block px-6 py-3 bg-gray-100 text-gray-500 font-medium rounded-xl">
               {language === 'zh' ? '🚧 敬请期待' : language === 'en' ? '🚧 Coming Soon' : '🚧 Kort tid'}
+            </div>
+
+            {/* 反馈表单 */}
+            <div className="mt-10 max-w-2xl mx-auto text-left">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200">
+                <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  💬 {language === 'zh' ? '您对我们有什么意见反馈，请在这里填写' : language === 'en' ? 'Share your feedback with us' : 'Del din feedback med os'}
+                </h4>
+                
+                <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {language === 'zh' ? '反馈内容' : language === 'en' ? 'Feedback' : 'Feedback'}
+                    </label>
+                    <textarea
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      placeholder={language === 'zh' ? '请输入您的意见或建议...' : language === 'en' ? 'Please share your thoughts or suggestions...' : 'Del dine tanker eller forslag...'}
+                      className="w-full h-32 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {language === 'zh' ? '相关链接（可选）' : language === 'en' ? 'Related Links (Optional)' : 'Relaterede links (Valgfri)'}
+                    </label>
+                    <input
+                      type="url"
+                      value={feedbackLink}
+                      onChange={(e) => setFeedbackLink(e.target.value)}
+                      placeholder={language === 'zh' ? 'https://...' : language === 'en' ? 'https://...' : 'https://...'}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {language === 'zh' ? '上传截图（可选）' : language === 'en' ? 'Upload Screenshot (Optional)' : 'Upload skærmbillede (Valgfri)'}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    {previewImage && (
+                      <div className="mt-2">
+                        <img src={previewImage} alt="Preview" className="max-h-40 rounded-lg border border-gray-200" />
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  >
+                    {isSubmitting 
+                      ? (language === 'zh' ? '提交中...' : language === 'en' ? 'Submitting...' : 'Indsender...')
+                      : (language === 'zh' ? '提交反馈 ✨' : language === 'en' ? 'Submit Feedback ✨' : 'Indsend Feedback ✨')
+                    }
+                  </button>
+                </form>
+
+                {submitSuccess && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-center">
+                    ✅ {language === 'zh' ? '感谢您的反馈！我们会认真阅读并改进。' : language === 'en' ? 'Thank you for your feedback! We will review it carefully.' : 'Tak for din feedback! Vi vil læse den grundigt.'}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

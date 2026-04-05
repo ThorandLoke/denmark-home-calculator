@@ -102,6 +102,11 @@ function analyzePricing(ctx: PropertyContext): AIFeatureResult {
     summary,
     points,
     confidence: regionData && size ? "high" : "medium",
+    disclaimer: lang === "zh"
+      ? "⚠️ 数据来源：基于区域历史均价估算，非实时数据。实际房价受房屋状况、地段、市场波动影响。建议查询 boligsiden.dk 获取最新成交价。"
+      : lang === "en"
+      ? "⚠️ Data source: Estimated based on historical area averages, not real-time data. Actual prices vary by condition, location, and market. Check boligsiden.dk for recent sales."
+      : "⚠️ Datakilde: Estimeret baseret på historiske områdegennemsnit, ikke realtidsdata. Faktiske priser varierer. Tjek boligsiden.dk for nylige salg.",
   };
 }
 
@@ -349,51 +354,60 @@ function analyzeRenovation(ctx: PropertyContext): AIFeatureResult {
   const { price, size, lang } = ctx;
   const points: AIPoint[] = [];
 
-  type RoiItem = { name: string; cost: number; valueAdd: number; roi: number };
+  type RoiItem = { name: string; cost: number; valueAdd: number; roi: number; category: "energy" | "aesthetic" | "maintenance" };
 
   const ROI_ITEMS: RoiItem[] = [
     {
-      name: lang === "zh" ? "安装热泵（空气源）" : lang === "en" ? "Air-to-water heat pump" : "Luft-til-vand varmepumpe",
-      cost: 150000, valueAdd: 200000, roi: 33,
-    },
-    {
-      name: lang === "zh" ? "太阳能板（6kW）" : lang === "en" ? "Solar panels (6kW)" : "Solceller (6kW)",
-      cost: 72000, valueAdd: 90000, roi: 25,
+      name: lang === "zh" ? "外墙重漆" : lang === "en" ? "Exterior painting" : "Udvendig maling",
+      cost: 30000, valueAdd: 50000, roi: 67, category: "maintenance",
     },
     {
       name: lang === "zh" ? "厨房翻新" : lang === "en" ? "Kitchen renovation" : "Køkkenrenovering",
-      cost: 80000, valueAdd: 120000, roi: 50,
-    },
-    {
-      name: lang === "zh" ? "浴室翻新" : lang === "en" ? "Bathroom renovation" : "Baderenovering",
-      cost: 60000, valueAdd: 85000, roi: 42,
+      cost: 80000, valueAdd: 120000, roi: 50, category: "aesthetic",
     },
     {
       name: lang === "zh" ? "阁楼保温" : lang === "en" ? "Attic insulation" : "Loftsisolering",
-      cost: size ? size * 0.9 * 400 : 40000, valueAdd: size ? size * 0.9 * 600 : 60000, roi: 50,
+      cost: size ? size * 0.9 * 400 : 40000, valueAdd: size ? size * 0.9 * 600 : 60000, roi: 50, category: "energy",
     },
     {
-      name: lang === "zh" ? "外墙重漆" : lang === "en" ? "Exterior painting" : "Udvendig maling",
-      cost: 30000, valueAdd: 50000, roi: 67,
+      name: lang === "zh" ? "浴室翻新" : lang === "en" ? "Bathroom renovation" : "Baderenovering",
+      cost: 60000, valueAdd: 85000, roi: 42, category: "aesthetic",
+    },
+    {
+      name: lang === "zh" ? "安装热泵（空气源）" : lang === "en" ? "Air-to-water heat pump" : "Luft-til-vand varmepumpe",
+      cost: 150000, valueAdd: 200000, roi: 33, category: "energy",
     },
     {
       name: lang === "zh" ? "地板翻新（实木）" : lang === "en" ? "Hardwood floor renovation" : "Trægulvsrenovering",
-      cost: size ? size * 400 : 50000, valueAdd: size ? size * 500 : 65000, roi: 30,
+      cost: size ? size * 400 : 50000, valueAdd: size ? size * 500 : 65000, roi: 30, category: "aesthetic",
+    },
+    {
+      name: lang === "zh" ? "太阳能板（6kW）" : lang === "en" ? "Solar panels (6kW)" : "Solceller (6kW)",
+      cost: 72000, valueAdd: 90000, roi: 25, category: "energy",
     },
   ];
 
   // 按 ROI 排序
   const sorted = [...ROI_ITEMS].sort((a, b) => b.roi - a.roi);
-  const top3 = sorted.slice(0, 3);
 
-  top3.forEach((item, idx) => {
+  // 优先级推荐：分高、中、低三档
+  points.push({
+    type: "info",
+    text: lang === "zh"
+      ? "🔴 高优先级（ROI > 50%）：性价比最高，强烈推荐优先考虑"
+      : lang === "en"
+      ? "🔴 High priority (ROI > 50%): Best value, strongly recommended"
+      : "🔴 Høj prioritet (ROI > 50%): Bedst værdi, anbefales",
+  });
+
+  sorted.filter(item => item.roi > 50).forEach((item, idx) => {
     points.push({
-      type: idx === 0 ? "positive" : "tip",
+      type: "positive",
       text: lang === "zh"
-        ? `${item.name}：投入 ${fmt(item.cost)}，可增加房产价值约 ${fmt(item.valueAdd)}，投产比 ${item.roi}%`
+        ? `${item.name}：投入 ${fmt(item.cost)}，增值 ${fmt(item.valueAdd)}，ROI ${item.roi}%`
         : lang === "en"
-        ? `${item.name}: Cost ${fmt(item.cost)}, adds ~${fmt(item.valueAdd)} value, ROI ${item.roi}%`
-        : `${item.name}: Koster ${fmt(item.cost)}, tilføjer ~${fmt(item.valueAdd)}, ROI ${item.roi}%`,
+        ? `${item.name}: Cost ${fmt(item.cost)}, adds ${fmt(item.valueAdd)} value, ROI ${item.roi}%`
+        : `${item.name}: Koster ${fmt(item.cost)}, tilføjer ${fmt(item.valueAdd)}, ROI ${item.roi}%`,
       value: `ROI ${item.roi}%`,
     });
   });
@@ -401,22 +415,71 @@ function analyzeRenovation(ctx: PropertyContext): AIFeatureResult {
   points.push({
     type: "info",
     text: lang === "zh"
-      ? `丹麦节能改造可申请 Energistyrelsen 补贴，最高可抵扣费用 25%`
+      ? "🟡 中优先级（ROI 30-50%）：投资回报良好，可根据预算选择"
       : lang === "en"
-      ? `Energy renovations may qualify for Energistyrelsen grants — up to 25% rebate`
-      : `Energirenoveringer kan få tilskud fra Energistyrelsen — op til 25% rabat`,
+      ? "🟡 Medium priority (ROI 30-50%): Good returns, choose based on budget"
+      : "🟡 Medium prioritet (ROI 30-50%): Gode afkast, vælg baseret på budget",
+  });
+
+  sorted.filter(item => item.roi >= 30 && item.roi <= 50).forEach((item) => {
+    points.push({
+      type: "tip",
+      text: lang === "zh"
+        ? `${item.name}：投入 ${fmt(item.cost)}，增值 ${fmt(item.valueAdd)}，ROI ${item.roi}%`
+        : lang === "en"
+        ? `${item.name}: Cost ${fmt(item.cost)}, adds ${fmt(item.valueAdd)} value, ROI ${item.roi}%`
+        : `${item.name}: Koster ${fmt(item.cost)}, tilføjer ${fmt(item.valueAdd)}, ROI ${item.roi}%`,
+      value: `ROI ${item.roi}%`,
+    });
+  });
+
+  points.push({
+    type: "info",
+    text: lang === "zh"
+      ? "🟢 低优先级（ROI < 30%）：长期投资，节能效果显著"
+      : lang === "en"
+      ? "🟢 Low priority (ROI < 30%): Long-term investment, significant energy savings"
+      : "🟢 Lav prioritet (ROI < 30%): Langsigtet investering",
+  });
+
+  sorted.filter(item => item.roi < 30).forEach((item) => {
+    points.push({
+      type: "tip",
+      text: lang === "zh"
+        ? `${item.name}：投入 ${fmt(item.cost)}，增值 ${fmt(item.valueAdd)}，ROI ${item.roi}%`
+        : lang === "en"
+        ? `${item.name}: Cost ${fmt(item.cost)}, adds ${fmt(item.valueAdd)} value, ROI ${item.roi}%`
+        : `${item.name}: Koster ${fmt(item.cost)}, tilføjer ${fmt(item.valueAdd)}, ROI ${item.roi}%`,
+      value: `ROI ${item.roi}%`,
+    });
+  });
+
+  // 节能改造补贴信息
+  const energyItems = sorted.filter(item => item.category === "energy");
+  points.push({
+    type: "info",
+    text: lang === "zh"
+      ? `💰 节能改造可申请 Energistyrelsen 补贴，最高可抵扣费用 25%（热泵、太阳能板、保温）`
+      : lang === "en"
+      ? `💰 Energy renovations (heat pump, solar, insulation) may qualify for Energistyrelsen grants — up to 25% rebate`
+      : `💰 Energirenoveringer kan få tilskud fra Energistyrelsen — op til 25% rabat`,
   });
 
   return {
     title: lang === "zh" ? "装修优先级建议" : lang === "en" ? "Renovation Priority" : "Renoveringsprioritet",
     icon: "🔧",
     summary: lang === "zh"
-      ? `投资回报率最高的是：${top3[0].name}（ROI ${top3[0].roi}%）`
+      ? `按投资回报率排序，${sorted[0].name} 性价比最高（ROI ${sorted[0].roi}%）`
       : lang === "en"
-      ? `Highest ROI renovation: ${top3[0].name} (${top3[0].roi}% ROI)`
-      : `Højeste ROI renovering: ${top3[0].name} (${top3[0].roi}% ROI)`,
+      ? `Sorted by ROI, ${sorted[0].name} offers best value (${sorted[0].roi}% ROI)`
+      : `Sorteret efter ROI, ${sorted[0].name} giver bedst værdi (${sorted[0].roi}% ROI)`,
     points,
     confidence: "medium",
+    disclaimer: lang === "zh"
+      ? "⚠️ 数据来源：基于丹麦装修市场平均成本和增值估算，实际 ROI 因房屋状况、位置、施工质量等因素差异较大。建议咨询多位承包商获取准确报价。"
+      : lang === "en"
+      ? "⚠️ Data source: Estimated based on Danish renovation market averages and typical value additions. Actual ROI varies significantly by condition, location, and quality. Get quotes from multiple contractors."
+      : "⚠️ Datakilde: Estimeret baseret på danske renoveringsmarkedsgennemsnit. Faktisk ROI varierer betydeligt. Få tilbud fra flere entreprenører.",
   };
 }
 
